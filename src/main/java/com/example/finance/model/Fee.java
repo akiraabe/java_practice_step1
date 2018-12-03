@@ -12,6 +12,8 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import com.example.finance.model.CashflowDetail;
+
 @Entity
 @Table(name = "fee")
 public class Fee implements Serializable {
@@ -54,11 +56,11 @@ public class Fee implements Serializable {
 	 */
 	public Fee(Map<String, Object> param, String calculationType) {
 		super();
-		this.id = 1L;
+		// TODO とりあえず、元本、期間、利率指定の元利均等にのみ対応します。
 		this.principal = (Long) param.get("principal");
 		this.term = (Integer) param.get("term");
 		this.rate = (Double) param.get("rate");
-		this.amount = (Long) param.get("amount");
+		this.amount = (Long) amount();
 		this.calculationType = calculationType;
 		this.cashflowDetails = calculate();
 		this.fee = this.cashflowDetails.stream().mapToLong(s -> s.getInterest()).sum();
@@ -69,19 +71,52 @@ public class Fee implements Serializable {
 	 */
 	public Fee() {
 	}
-	
-	
-	//TODO このメソッドは将来不要となります。
+
+	/**
+	 * 賦金額を計算します。
+	 * 
+	 * @return 賦金額
+	 */
+	private Long amount() {
+		Double monthlyRate = this.getRate() / 1200;
+		Double paymentRate = monthlyRate * Math.pow((1 + monthlyRate), this.getTerm())
+				/ (Math.pow((1 + monthlyRate), this.getTerm()) - 1);
+		return (long) Math.floor(this.getPrincipal() * paymentRate);
+	}
+
+	/**
+	 * 返済明細の展開をします。
+	 * @return 返済明細
+	 */
 	private List<CashflowDetail> calculate() {
 
-		CashflowDetail cd = new CashflowDetail();
-		cd.setAmount(100L);
-		cd.setBalance(200L);
-		cd.setInterest(300L);
-		cd.setPrincipal(400L);
-		List<CashflowDetail> cds = new ArrayList<>();
-		cds.add(cd);
-		return cds;
+        Long amount = this.amount;
+		// returnするオブジェクトを生成します。
+		List<CashflowDetail> result = new ArrayList<>();
+
+		// 期間分ループしながら残債計算をします。
+		Long balance = this.getPrincipal();
+		for (int i = 0; i < this.getTerm(); i++) {
+			CashflowDetail detail = new CashflowDetail();
+			boolean isEndOfList = (i == (this.getTerm()- 1));
+			if (isEndOfList) {
+				detail.setInterest((long) (balance * this.getRate()/ 1200));
+				detail.setPrincipal(balance);
+				detail.setAmount(detail.getInterest() + detail.getPrincipal());
+				detail.setBalance(0L);
+				result.add(detail);
+				break;
+			}
+			detail.setInterest((long) (balance * this.getRate()/ 1200));
+			detail.setAmount(amount);
+			detail.setPrincipal(amount - detail.getInterest());
+			balance -= detail.getPrincipal();
+			detail.setBalance(balance);
+			result.add(detail);
+		}
+
+		// 値をreturnします。
+		return result;
 	}
 
 	/**

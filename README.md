@@ -1,5 +1,5 @@
 # java_practice_step1
-Java技術者育成施策(1st step)
+Java技術者育成施策(2nd step)
 
-応用編Webアプリの初期状態です。
-内容は固定値ですが、Controllerで画面遷移します。
+元本利率指定残債計算のみに対応
+DBへのInsertとSelect処理も実装
