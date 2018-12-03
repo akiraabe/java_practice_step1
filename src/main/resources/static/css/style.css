@@ -1,0 +1,53 @@
+body {
+  width: 1000px;
+  background: #CCCCCC;
+}
+
+.label-form {
+  text-align: left;
+  width: 100px;
+}
+
+.colon-form {
+  text-align: center;
+  width: 1px;
+}
+
+.form-group {
+  text-align: left;
+  width: 500px;
+}
+
+label {
+  display: block;
+  float: left;
+  width: 100px;
+}
+
+table.table-form {
+  border: none;
+  border-collapse: separate; 
+}
+
+th.th-form {
+  width: 80px;
+  text-align: center; 
+}
+
+td.td-form {
+  width: 80px;
+  text-align: right; 
+}
+
+td.td-form-center {
+  width: 80px;
+  text-align: center; 
+}
+
+.text-danger {
+  background-color: red;  
+}
+
+.alert-danger {
+  background-color: red;  
+}

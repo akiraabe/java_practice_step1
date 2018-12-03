@@ -1,0 +1,76 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Finance</title>
+    <link rel="stylesheet" media="all" th:href="@{/css/style.css}" />
+</head>
+<body>
+    <p>
+    <h2>Input income information</h2>
+    <form th:action="@{/finance/create}" th:object="${financeForm}"
+          method="POST">
+
+        <div th:if="${#fields.hasErrors('all')}">
+            <span  class="alert-danger" th:text="#{common.error}">ErrorMessage</span>
+        </div>
+
+        <span th:if="${#fields.hasErrors('validForFixInterestMethod')}" th:errors="*{validForFixInterestMethod}" class="alert-danger"></span>
+        <span th:if="${#fields.hasErrors('validForInterestMethod')}"    th:errors="*{validForInterestMethod}"    class="alert-danger"></span>
+        <span th:if="${#fields.hasErrors('validForSumOfDigit')}"        th:errors="*{validForSumOfDigit}"        class="alert-danger"></span>
+
+		<div>
+		    <label>Type</label>
+		    <select name="type">
+		    <option th:each="detail : ${financeForm.typeBeanList}" th:value=${detail.id} th:selected="${detail.id == financeForm.type}" th:inline="text">[[${detail.value}]]</option>
+		    </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="principal">Principal</label>
+            <input type="text" class="form-control" id="principal"
+             name="principal" th:field="*{principal}" placeholder="Principal"/>
+            <span th:if="${#fields.hasErrors('principal')}" class="text-danger"
+                  th:errors="*{principal}">Error</span>
+        </div>
+
+        <div class="form-group">
+            <label for="term">Term</label>
+            <input type="text" class="form-control" id="term"
+             name="term" th:field="*{term}" placeholder="Term"/>
+            <span th:if="${#fields.hasErrors('term')}" class="text-danger"
+                  th:errors="*{term}">Error</span>              
+        </div>
+
+        <div class="form-group">
+            <label for="rate">Rate</label>
+            <input type="text" class="form-control" id="rate"
+             name="rate" th:field="*{rate}" placeholder="Rate"/>
+            <span th:if="${#fields.hasErrors('rate')}" class="text-danger"
+                  th:errors="*{rate}">Error</span>
+        </div>
+
+        <div class="form-group">
+            <label for="rate">Amount</label>
+            <input type="text" class="form-control" id="amount"
+             name="amount" th:field="*{amount}" placeholder="Amount"/>
+            <span th:if="${#fields.hasErrors('amount')}" class="text-danger"
+                  th:errors="*{amount}">Error</span>
+        </div>
+        
+        <div class="form-group">
+            <label for="rate">Fee</label>
+            <input type="text" class="form-control" id="fee"
+             name="fee" th:field="*{fee}" placeholder="Fee"/>
+            <span th:if="${#fields.hasErrors('fee')}" class="text-danger"
+                  th:errors="*{fee}">Error</span>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Submit</button>
+            <button type="reset" class="btn">Reset</button>
+        </div>
+    </form>
+    </p>
+</body>
+</html>

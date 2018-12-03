@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+	<title>Finance</title>
+	<link rel="stylesheet" media="all" th:href="@{/css/style.css}" />
+</head>
+<body>
+<h2>Show result</h2>
+<div th:object="${form}">
+	<table class="table-form">
+	    <tr>
+	        <td class="label-form">Term</td>
+	        <td class="colon-form">:</td>
+	        <td th:text="*{term}">99</td>
+	    </tr>
+	    <tr>
+	        <td class="label-form">Fee</td>
+	        <td class="colon-form">:</td>
+	        <td th:text="*{#numbers.formatInteger(fee, 1, 'COMMA')}">9999</td>
+		</tr>
+		<tr>
+	        <td class="label-form">Principal</td>
+	        <td class="colon-form">:</td>
+	        <td th:text="*{#numbers.formatInteger(principal, 1, 'COMMA')}">9999</td>
+	    </tr>
+	    <tr>
+	        <td class="label-form">Rate</td>
+	        <td class="colon-form">:</td>
+	        <td th:text="*{rate}">99.99</td>
+	    </tr>
+    </table>
+    <h3>Fee list</h3>
+    <table class="table-form">
+    	<tr>
+    		<th class="th-form">利息</th>
+    		<th class="th-form">元本</th>
+    		<th class="th-form">合計額</th>
+    		<th class="th-form">元本残</th>
+    	</tr>
+    	<tr th:each="detail : ${list}">
+    	    <td class="td-form" th:text="${#numbers.formatInteger(detail.interest , 1, 'COMMA')}">9999</td>
+      		<td class="td-form" th:text="${#numbers.formatInteger(detail.principal, 1, 'COMMA')}">9999</td>
+      		<td class="td-form" th:text="${#numbers.formatInteger(detail.amount   , 1, 'COMMA')}">9999</td>
+      		<td class="td-form" th:text="${#numbers.formatInteger(detail.balance  , 1, 'COMMA')}">9999</td>
+    	</tr>
+    </table>
+    <div>
+        <a th:href="@{'/finance'}">List Fees</a>
+    </div>
+
+</div>
+</body>
+</html>

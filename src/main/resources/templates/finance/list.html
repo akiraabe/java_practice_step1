@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+	<title>Finance</title>
+	<link rel="stylesheet" media="all" th:href="@{/css/style.css}" />
+</head>
+<body>
+    <p>
+    <h2>The List of Fees</h2>
+
+    <table class="table-form">
+    	<tr>
+    		<th class="th-form">id</th>
+    		<th class="th-form">元本</th>
+    		<th class="th-form">利息</th>
+    		<th class="th-form">利率</th>
+    		<th class="th-form">期間</th>
+    		<th class="th-form">合計額</th>
+    		<th class="th-form">計算種別</th>
+    	</tr>
+    	<tr th:each="detail : ${fees}">
+      		<td class="td-form-center"><a th:href="@{'/finance/get/' + ${detail.id}}"/><span th:text="${detail.id}"></span></a></td>
+      		<td class="td-form" th:text="${#numbers.formatInteger(detail.principal, 1, 'COMMA')}">9999</td>
+    	    <td class="td-form" th:text="${#numbers.formatInteger(detail.fee , 1, 'COMMA')}">9999</td>
+    	    <td class="td-form" th:text="${detail.rate}">9999</td>
+      		<td class="td-form" th:text="${#numbers.formatInteger(detail.term   , 1, 'COMMA')}">9999</td>
+      		<td class="td-form" th:text="${#numbers.formatInteger(detail.amount  , 1, 'COMMA')}">9999</td>
+    	    <td class="td-form" th:text="${detail.calculationType}">9</td>
+    	</tr>
+    </table>
+    <div>
+        <a th:href="@{'/finance/input'}">New Fee</a>
+    </div>
+    </p>
+</body>
+</html>
