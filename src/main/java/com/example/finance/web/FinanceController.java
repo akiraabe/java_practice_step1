@@ -1,8 +1,6 @@
 package com.example.finance.web;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -22,13 +20,14 @@ import com.example.finance.repository.FeeRepository;
 /**
  * 
  * 収益関連の画面コントローラです。
+ * 
  * @author Akira Abe
  *
  */
 @Controller
 @RequestMapping("finance")
 public class FinanceController {
-	
+
 	@Autowired
 	FeeRepository repository;
 
@@ -36,16 +35,17 @@ public class FinanceController {
 	FinanceForm setUpForm() {
 		return new FinanceForm();
 	}
-	
+
 	@RequestMapping(method = RequestMethod.GET)
-    String list(Model model) {
+	String list(Model model) {
 
-        List<Fee> fees = repository.findAll();
+		List<Fee> fees = repository.findAll();
 
-        if (fees != null) fees.forEach(System.out::println);
-        model.addAttribute("fees", fees);
-        return "finance/list";
-    }
+		if (fees != null)
+			fees.forEach(System.out::println);
+		model.addAttribute("fees", fees);
+		return "finance/list";
+	}
 
 	@RequestMapping(value = "/input", method = RequestMethod.GET)
 	public String showInputView() {
@@ -61,14 +61,8 @@ public class FinanceController {
 
 		// System.out.println(form);
 
-		// TODO 本来は、計算種類毎に、委譲先のドメインオブジェクトを切り替える
-		Map<String, Object> param = new HashMap<>();
-		param.put("principal", Long.parseLong(form.getPrincipal()));
-		param.put("term", form.getTerm());
-		param.put("rate", Double.parseDouble(form.getRate()));
-		
-		Fee fee = new Fee(param, "2");
-		
+		// 計算種類毎に、委譲先のドメインオブジェクトを切り替える
+		Fee fee = new Fee(form);
 		repository.save(fee);
 
 		ModelMap modelMap = new ModelMap();
@@ -93,13 +87,13 @@ public class FinanceController {
 
 		return "/finance/showresult";
 	}
-	
-	@RequestMapping(value = "/get/{id}", method = RequestMethod.GET)
-    public String show(@PathVariable Long id, Model model) {
 
-        model.addAttribute("form", repository.getOne(id));
-        model.addAttribute("list", repository.getOne(id).getCashflowDetails());
+	@RequestMapping(value = "/get/{id}", method = RequestMethod.GET)
+	public String show(@PathVariable Long id, Model model) {
+
+		model.addAttribute("form", repository.getOne(id));
+		model.addAttribute("list", repository.getOne(id).getCashflowDetails());
 
 		return "/finance/showresult";
-    }
+	}
 }

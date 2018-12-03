@@ -1,7 +1,7 @@
 package com.example.finance.model;
 
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -12,7 +12,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import com.example.finance.model.CashflowDetail;
+import com.example.finance.web.FinanceForm;
 
 @Entity
 @Table(name = "fee")
@@ -46,25 +46,10 @@ public class Fee implements Serializable {
 	@Transient
 	private List<CashflowDetail> cashflowDetails;
 
-	/**
-	 * 引数を取るコンストラクターです。
-	 * 
-	 * @param param
-	 *            引数のMap
-	 * @param calculationType
-	 *            計算種類
-	 */
-	public Fee(Map<String, Object> param, String calculationType) {
-		super();
-		// TODO とりあえず、元本、期間、利率指定の元利均等にのみ対応します。
-		this.principal = (Long) param.get("principal");
-		this.term = (Integer) param.get("term");
-		this.rate = (Double) param.get("rate");
-		this.amount = (Long) amount();
-		this.calculationType = calculationType;
-		this.cashflowDetails = calculate();
-		this.fee = this.cashflowDetails.stream().mapToLong(s -> s.getInterest()).sum();
-	}
+	/** Strategy */
+	@Transient
+	private FeeCalculationStrategy strategy;
+
 
 	/**
 	 * Default constructor.
@@ -73,50 +58,40 @@ public class Fee implements Serializable {
 	}
 
 	/**
-	 * 賦金額を計算します。
-	 * 
-	 * @return 賦金額
+	 * 引数を取るコンストラクターです。
+	 * @param form 入力画面
 	 */
-	private Long amount() {
-		Double monthlyRate = this.getRate() / 1200;
-		Double paymentRate = monthlyRate * Math.pow((1 + monthlyRate), this.getTerm())
-				/ (Math.pow((1 + monthlyRate), this.getTerm()) - 1);
-		return (long) Math.floor(this.getPrincipal() * paymentRate);
-	}
+	public Fee(FinanceForm form) {
+		super();
+		this.calculationType = form.getType();
+		switch (calculationType) {
+		case ("1"):
+			this.principal = Long.parseLong(form.getPrincipal());
+			this.term = form.getTerm();
+			this.rate = Double.parseDouble(form.getRate());
+			this.amount = Long.parseLong(form.getAmount());
+			this.strategy = new FixInterestMethodFee();
+			this.cashflowDetails = strategy.calculate(this);
+			this.fee = this.cashflowDetails.stream().mapToLong(s -> s.getInterest()).sum();
+			break;
 
-	/**
-	 * 返済明細の展開をします。
-	 * @return 返済明細
-	 */
-	private List<CashflowDetail> calculate() {
+		case ("2"):
+			this.principal = Long.parseLong(form.getPrincipal());
+			this.term = form.getTerm();
+			this.rate = Double.parseDouble(form.getRate());
+			this.strategy = new InterestMethodFee();
+			this.amount = strategy.payAmount(this);
+			this.cashflowDetails = strategy.calculate(this);
+			this.fee = this.cashflowDetails.stream().mapToLong(s -> s.getInterest()).sum();
+			break;
 
-        Long amount = this.amount;
-		// returnするオブジェクトを生成します。
-		List<CashflowDetail> result = new ArrayList<>();
-
-		// 期間分ループしながら残債計算をします。
-		Long balance = this.getPrincipal();
-		for (int i = 0; i < this.getTerm(); i++) {
-			CashflowDetail detail = new CashflowDetail();
-			boolean isEndOfList = (i == (this.getTerm()- 1));
-			if (isEndOfList) {
-				detail.setInterest((long) (balance * this.getRate()/ 1200));
-				detail.setPrincipal(balance);
-				detail.setAmount(detail.getInterest() + detail.getPrincipal());
-				detail.setBalance(0L);
-				result.add(detail);
-				break;
-			}
-			detail.setInterest((long) (balance * this.getRate()/ 1200));
-			detail.setAmount(amount);
-			detail.setPrincipal(amount - detail.getInterest());
-			balance -= detail.getPrincipal();
-			detail.setBalance(balance);
-			result.add(detail);
+		case ("3"):
+			this.term = form.getTerm();
+			this.fee = Long.parseLong(form.getFee());
+			this.strategy = new SumOfDigitFee();
+			this.cashflowDetails = strategy.calculate(this);
+			break;
 		}
-
-		// 値をreturnします。
-		return result;
 	}
 
 	/**
@@ -224,7 +199,22 @@ public class Fee implements Serializable {
 		if (cashflowDetails != null) {
 			return cashflowDetails;
 		} else {
-			this.cashflowDetails = calculate();
+			switch (calculationType) {
+			case "1":
+				this.strategy = new FixInterestMethodFee();
+				this.cashflowDetails = strategy.calculate(this);
+				break;
+			case "2":
+				this.strategy = new InterestMethodFee(); // StrategyPattern
+				this.cashflowDetails = strategy.calculate(this);
+				break;
+			case "3":
+				this.strategy = new SumOfDigitFee(); // StrategyPattern
+				this.cashflowDetails = strategy.calculate(this);
+				break;
+			default:
+				System.out.println("error"); // ここには到達しないはず。
+			}	
 		}
 		return cashflowDetails;
 	}
