@@ -5,7 +5,7 @@
     <title>Finance</title>
     <link rel="stylesheet" media="all" th:href="@{/css/style.css}" />
 </head>
-<body>
+<body onload="disableTextField()">
     <p>
     <h2>Input income information</h2>
     <form th:action="@{/finance/create}" th:object="${financeForm}"
@@ -21,7 +21,7 @@
 
 		<div>
 		    <label>Type</label>
-		    <select name="type">
+		    <select name="type" id="loanType"  onChange="disableTextField()">
 		    <option th:each="detail : ${financeForm.typeBeanList}" th:value=${detail.id} th:selected="${detail.id == financeForm.type}" th:inline="text">[[${detail.value}]]</option>
 		    </select>
         </div>
@@ -72,5 +72,30 @@
         </div>
     </form>
     </p>
+    <script>
+	function disableTextField() {
+		// console.log("*** function disableTextField ***");
+		
+		obj = document.getElementById("loanType");
+		// console.log(obj.value);
+		
+		// initialize
+		document.getElementById("principal").disabled = false;
+		document.getElementById("rate").disabled = false;
+		document.getElementById("amount").disabled = false;
+		document.getElementById("fee").disabled = false;
+
+		if ( obj.value == '1' ) {
+			document.getElementById("fee").disabled = true;
+		} else if ( obj.value == '2' ) {
+		    document.getElementById("amount").disabled = true;
+			document.getElementById("fee").disabled = true;
+		} else {
+			document.getElementById("principal").disabled = true;
+			document.getElementById("amount").disabled = true;
+			document.getElementById("rate").disabled = true;
+		}
+	}
+    </script>
 </body>
 </html>
